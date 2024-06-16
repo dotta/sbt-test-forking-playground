@@ -20,9 +20,7 @@ To configure the build with this setup comment all settings in `testSettings` bu
 ### Parallel test execution with forking
 To go back executing test classes in parallel on a forked JVM one just needs setting `Test / testForkedParallel := true`. Doing so brings the overall test execution time back to 4 seconds. To configure the build with this setup comment `Test / parallelExecution := false` (or set it to `true`).
 
-A surprising behavior is that if `Test / parallelExecution := false` is configured, tests classes are no longer executed in parallel despite `Test / testForkedParallel` being enabled.
-
-To explain this behavior, I speculate that the `parallelExecution` setting has a *higher precedence* (it determines the overall execution mode of tests). When set to `false`, it effectively overrides the `testForkedParallel` setting, leading to sequential execution even when forking. When `Test / parallelExecution` is set to `false`, sbt schedules the test tasks sequentially, regardless of whether they are forked or not. Even if `Test / testForkedParallel` allows for multiple JVMs, they are not scheduled in parallel because sbt respects the sequential execution directive. This behavior can be observed by simply executing `test`  (i.e., no changes are needed in the build, as this is how the build is setup).
+A surprising behavior is that if `Test / parallelExecution := false` is configured, tests classes are no longer executed in parallel despite `Test / testForkedParallel` being enabled. One would need to look into the sbt internals to understand why it works this way.
 
 #### Test grouping
  Test grouping can also be combined with test forking to achieve concurrent test execution. The project's build contains an example. However, note that `concurrentRestrictions` by default contains `Limit forked-test-group to 1`, which is why `concurrentRestrictions := Seq(Tags.limit(Tags.ForkedTestGroup, 3))` would be needed to allow sbt creating three forked JVM (one for each test group).
